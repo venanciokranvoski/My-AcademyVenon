@@ -1,0 +1,43 @@
+# APP  - ACADEMIA -  
+
+## Indice
+
+  - [Visão Geral](#Visão-Geral)
+  - [Tecnologias](#Tecnologias)
+  - [Funcionalidades](#Funcionalidades)
+  - [Rodar na sua Maquina](rodar-na-sua-maquina)
+
+- [Autor](#Autor)
+
+
+## Visão Geral
+
+Esta aplicação tem como principal objetivo fazer integração com o Back-End implementado em NodeJS, para fins de estudo e aprimoramento, aplicação feita com base nos desafios da rocketseat que foi responsavel para implementar o designer do Front-End, criada  utilizando o framework *Native-Base*, que amplia a peformance de uma forma incrivel estou apaixonado por este Frame, o ganho de performance é incrivel, com certeza irei utilizar em varios outros projetos <a>https://nativebase.io</a>.   
+
+
+### Tecnologias
+
+- React-Native 
+- Native-Base 
+- React-Hook-Form
+- NodeJS 
+- Typescript
+
+## Funcionalidades
+
+- Login/Cadastro
+- Edita  Cadastro
+- Fluxo de treinos para você construir aquele *SHAPE*
+
+## Rodar na sua Maquina  
+  
+- Clonar o Projeto ! 
+- Acessar caminho da aplicação  
+- Dar o comando  *$ npm install*
+- Dar o comando  *$ npx expo start*
+- Escanear QR-Code Via *Expo Go* e o app Vai funcionar :-)
+
+## Autor
+
+- Github - [venanciokranvoski](https://github.com/venanciokranvoski)
+- Linkedin - [venancio Augusto](https://www.linkedin.com/in/venancio-augusto-87678213a/)
