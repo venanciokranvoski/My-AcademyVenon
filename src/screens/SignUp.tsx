@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from 'native-base';
 import BackgroundImage from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
@@ -9,6 +9,11 @@ import { useNavigation } from '@react-navigation/native';
 import * as yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup'
+
+import axios from 'axios';
+import { api } from '@services/api';
+import { Alert } from 'react-native';
+import { AppError } from '@utils/AppError';
 
 
 type FormDataProps = {
@@ -30,6 +35,8 @@ const signUpSchema = yup.object({
 export function SignUp(){
     const navigation = useNavigation();
 
+    const toast = useToast();
+
 
     const { control, handleSubmit, formState: {errors} } = useForm<FormDataProps>({
       resolver: yupResolver(signUpSchema)
@@ -40,10 +47,43 @@ export function SignUp(){
     }
 
 
-    function handleSignUp(data: FormDataProps){
-     console.log(data);
-     
+    async function handleSignUp({name, email, password,}: FormDataProps){
+    //++  Axios   
+    try {
+      const response = await api.post('/users', {name, email, password});
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+
+      const title = isAppError ? error.message : 'Não foi possivel criar a conta. Tente novamente mais tarde!';
+
+      toast.show({
+          title,
+          placement: 'top',
+          bgColor: 'red.500'
+      })
+
+      // pegando mensagem do axios tratada pelo Back-end
+      // if(axios.isAxiosError(error)){
+      //   Alert.alert('Error', error.response?.data.message);
+      // }
+      
     }
+
+    //=====
+    //  ======================== fetch ================================
+    //    const response = await fetch('http://192.168.15.64:3333/users', {
+    //    method: 'POST',
+    //    headers: {
+    //      'Accept': 'aplication/json',
+    //      'Content-Type': 'application/json'
+    //    },
+    //    body: JSON.stringify({name, email, password})
+    //  }); 
+    //   const data = await response.json(); 
+    //   console.warn(data);
+    //  ================================================================
+         
+  }
 
     return (
       <ScrollView contentContainerStyle={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
