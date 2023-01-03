@@ -1,4 +1,5 @@
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import { useState } from 'react';
+import { VStack, Image, Text, Center, Heading, ScrollView, Toast, useToast } from 'native-base';
 
 import BackgroundImage from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
@@ -12,6 +13,9 @@ import * as yup from 'yup';
 import { useForm, Controller} from 'react-hook-form';
 import { yupResolver} from '@hookform/resolvers/yup';
 
+import { useAuth } from '@hooks/useAuth';
+import { AppError } from '@utils/AppError';
+
 
 type FormLoginAcess = {
   email : string;
@@ -23,9 +27,11 @@ const signInSchema = yup.object({
   email: yup.string().required('Informe o email !').email('Email inválido !'),
   password: yup.string().required('Informe a senha !').min(6, 'A senha deve ter pelo menos 6 digitos !'),
 })
-
-
 export function SignIn(){
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const  { signIn } = useAuth();
+  const toast = useToast();
 
   const  {control, handleSubmit, formState : { errors } } = useForm<FormLoginAcess>({
      resolver : yupResolver(signInSchema)
@@ -37,9 +43,24 @@ export function SignIn(){
       navigation.navigate('signUp');
     }
 
-    function handleSignIn(data: FormLoginAcess){
-      console.log(data);
+    async function handleSignIn({email, password}: FormLoginAcess){
+      try {
+        setIsLoading(true);
+        await signIn(email, password);
+      } catch (error) {
+        const isAppError = error instanceof AppError;
+
+        setIsLoading(false);
       
+        const title = isAppError ? error.message : 'Não foi possivel entrar. Tente novamente mais tarde !';
+        toast.show({
+          title,
+          placement: 'top',
+          bgColor: 'red.500'
+        })
+      
+      }
+     
     }
 
     return (
@@ -57,7 +78,7 @@ export function SignIn(){
             <LogoSvg />
 
             <Text color="gray.100" fontSize="sm">
-                Treine sua mnente e seu corpo
+                Treine sua mente e seu corpo
             </Text>
           </Center>
           
@@ -81,7 +102,6 @@ export function SignIn(){
                     keyboardType='email-address'
                     autoCapitalize='none'
                     onChangeText={onChange}
-                    value={value}
                     errorMessage={errors.email?.message}
                 />
               )}
@@ -90,13 +110,12 @@ export function SignIn(){
 
             <Controller 
               control={control}
-              name="email"
+              name="password"
               render={({ field: { onChange, value}})=> (
                 <Input 
                   placeholder='Senha'  
                   secureTextEntry
                   onChangeText={onChange}
-                  value={value}
                   errorMessage={errors.password?.message}
                 />
               )}
@@ -105,6 +124,7 @@ export function SignIn(){
              <Button 
               title='Acessar'
               onPress={handleSubmit(handleSignIn)} 
+              isLoading={isLoading}
              /> 
 
           </Center>

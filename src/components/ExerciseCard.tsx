@@ -1,18 +1,21 @@
 import { Heading, HStack, Image, VStack, Text, Icon } from "native-base";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native"
 import {Entypo} from '@expo/vector-icons';
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
+
+import { api } from "@services/api";
 
 type Props = TouchableOpacityProps & {
-      
+    data: ExerciseDTO;    
 };
 
 
-export function ExerciseCard({...rest}: Props){
+export function ExerciseCard({data, ...rest}: Props){
     return (
       <TouchableOpacity {...rest}>
          <HStack bg="gray.500" alignItems="center" p={2} rounded="md" mb={3}>
             <Image
-              source={{uri: 'https://marcelogomespersonal.com/wp-content/uploads/2022/01/remada-curvada-com-barra-pegada-pronada-ou-pegada-supinada.jpg'}}
+              source={{uri: `${api.defaults.baseURL}/exercise/thumb/${data.thumb}` }}
               alt="Imagem do exercicio"
               w={16}
               h={16}
@@ -22,10 +25,10 @@ export function ExerciseCard({...rest}: Props){
 
         <VStack flex={1}>
             <Heading fontSize="lg" color="white" ml={3}>
-                Remada cavada
+               {data.name}
             </Heading>
             <Text fontSize="sm" color="gray.200" ml={3}>
-               3 séries x 12 repetições
+               {data.series} séries de  {data.repetitions} repetições
             </Text>
         </VStack>
 

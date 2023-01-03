@@ -14,6 +14,7 @@ import { Home } from '@screens/Home';
 
 import { AuthContextProvider } from './src/context/AuthContext';
 
+
 export default function App() {
   const [ fontsLoader ] = useFonts({ Roboto_400Regular, Roboto_700Bold });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from 'native-base';
 import BackgroundImage from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
@@ -14,6 +14,9 @@ import axios from 'axios';
 import { api } from '@services/api';
 import { Alert } from 'react-native';
 import { AppError } from '@utils/AppError';
+import { Loading } from '@components/Loading';
+import { SignIn } from './SignIn';
+import { useAuth } from '@hooks/useAuth';
 
 
 type FormDataProps = {
@@ -33,9 +36,12 @@ const signUpSchema = yup.object({
 
 
 export function SignUp(){
+    const [isLoading, setisLoading] = useState(false);
     const navigation = useNavigation();
 
     const toast = useToast();
+
+    const { SignIn } = useAuth();
 
 
     const { control, handleSubmit, formState: {errors} } = useForm<FormDataProps>({
@@ -50,7 +56,10 @@ export function SignUp(){
     async function handleSignUp({name, email, password,}: FormDataProps){
     //++  Axios   
     try {
-      const response = await api.post('/users', {name, email, password});
+      setisLoading(true);
+      await api.post('/users', {name, email, password});
+      await SignIn(email, password);
+
     } catch (error) {
       const isAppError = error instanceof AppError;
 
@@ -127,9 +136,6 @@ export function SignUp(){
               )}
             />
 
-            <Text color="red.500">
-           
-            </Text>
 
             <Controller 
               control={control}
@@ -181,6 +187,7 @@ export function SignUp(){
             <Button 
               title='Criar e Acessar'
               onPress={handleSubmit(handleSignUp)}
+              isLoading={isLoading}
             /> 
 
           </Center>

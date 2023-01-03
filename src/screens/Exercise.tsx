@@ -1,23 +1,67 @@
-import {Heading, HStack, Icon, VStack, Text, Image, Box} from 'native-base';
+import React, { useEffect } from 'react';
+import {Heading, HStack, Icon, VStack, Text, Image, Box, useToast} from 'native-base';
 import { TouchableOpacity } from 'react-native';
 import { Feather } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app.routes';
 
 import  BodySvg         from  '@assets/body.svg';
 import  SeriesSvg       from  '@assets/series.svg';
 import  RepetitionsSvg  from  '@assets/repetitions.svg';
 import { Button } from '@components/Button';
+import { AppError } from '@utils/AppError';
+import { api } from '@services/api';
+
+import { ExerciseDTO } from '@dtos/ExerciseDTO';
+
+
+
+type RouteParamsProps = {
+    exerciseId: string;
+}
 
 
 
 export function Exercise(){
+
+    const [exercisePlus, setExercise] = React.useState<ExerciseDTO>({} as ExerciseDTO)
+
+    const route = useRoute();
+    const Toast = useToast();
+
+    const { exerciseId } = route.params as RouteParamsProps;
+   
+    
 
     const navigation = useNavigation<AppNavigatorRoutesProps>();
 
    function handleGoBack(){
       navigation.goBack();
    }
+
+   async function fetchExerciseDetails(){
+    try {
+        const response = await api.get(`/exercises/${exerciseId} `);  
+        setExercise(response.data);
+        console.log('INFO => ', response.data.demo);
+        
+    } catch (error) {
+        const isAppError = error instanceof AppError;
+            const title = isAppError ? error.message : "Não foi possivel pegar os exercicios !"
+
+            Toast.show({
+                title,
+                placement: "top",
+                bgColor: 'red.500'
+            })
+    }
+   }
+
+
+
+   useEffect(()=> {
+    fetchExerciseDetails();
+   },[exerciseId])
 
 
 
@@ -36,11 +80,11 @@ export function Exercise(){
                 <HStack justifyContent="space-between" mt={4} mb={8}
                 alignItems="center">
             
-                    <Heading color="white" fontSize="lg" flexShrink={1}>Puxada frontal</Heading>
+                    <Heading color="white" fontSize="lg" flexShrink={1}>{exercisePlus.name}</Heading>
                     <HStack alignItems="center">
                         <BodySvg />
                         <Text color="gray.200" ml={1} textTransform="capitalize">
-                            Costas
+                            {exercisePlus.group}
                         </Text>
                     </HStack>
                 </HStack>
@@ -50,7 +94,7 @@ export function Exercise(){
                 <Image 
                   w="full" 
                   h={80}
-                  source={{uri: 'https://marcelogomespersonal.com/wp-content/uploads/2022/01/remada-curvada-com-barra-pegada-pronada-ou-pegada-supinada.jpg' }}
+                  source={{uri:`${api.defaults.baseURL}/exercise/demo/${exercisePlus?.demo}`}}
                   alt="Nome do Exercicio"
                   mb={3}
                   resizeMode="cover"
@@ -67,14 +111,14 @@ export function Exercise(){
                         <HStack>
                             <SeriesSvg />
                             <Text color="gray.200" ml={2}>
-                                3 séries 
+                            {exercisePlus.series} séries
                             </Text>
                         </HStack>
 
                         <HStack>
                             <RepetitionsSvg />
                             <Text color="gray.200" ml={2}>
-                                3 séries 
+                                {exercisePlus.repetitions} Repetições
                             </Text>
                         </HStack>
                     </HStack>
