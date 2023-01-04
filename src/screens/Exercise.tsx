@@ -23,14 +23,16 @@ type RouteParamsProps = {
 
 
 export function Exercise(){
-
-    const [exercisePlus, setExercise] = React.useState<ExerciseDTO>({} as ExerciseDTO)
+ 
+    const [exercise, setExercise] = React.useState<ExerciseDTO>({} as ExerciseDTO)
+    const [sendingRegister, setSendingRegister] = React.useState(false);
 
     const route = useRoute();
     const Toast = useToast();
 
     const { exerciseId } = route.params as RouteParamsProps;
-   
+
+    console.log(exerciseId);
     
 
     const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -42,9 +44,7 @@ export function Exercise(){
    async function fetchExerciseDetails(){
     try {
         const response = await api.get(`/exercises/${exerciseId} `);  
-        setExercise(response.data);
-        console.log('INFO => ', response.data.demo);
-        
+        setExercise(response.data);  
     } catch (error) {
         const isAppError = error instanceof AppError;
             const title = isAppError ? error.message : "Não foi possivel pegar os exercicios !"
@@ -55,7 +55,40 @@ export function Exercise(){
                 bgColor: 'red.500'
             })
     }
+
    }
+
+   async function handleExercisehistoryRegister(){
+     try {
+        setSendingRegister(true);
+        
+        
+        await api.post('/history', { exercise_id: exerciseId });
+
+
+        Toast.show({
+            title: 'Parabéns! Exercicio Concluido e Registrado no seu Historico!',
+            placement: "top",
+            bgColor: 'green.700'
+        })
+
+        navigation.navigate('history');
+
+     } catch (error) {
+        console.log('dadada => ',error);
+        
+        const isAppError = error instanceof AppError;
+        const title = isAppError ? error.message : "Não foi possível carregar o historico !"
+
+        Toast.show({
+            title,
+            placement: "top",
+            bgColor: 'red.500'
+        })
+     }finally{
+        setSendingRegister(false)
+     }
+    }
 
 
 
@@ -80,26 +113,29 @@ export function Exercise(){
                 <HStack justifyContent="space-between" mt={4} mb={8}
                 alignItems="center">
             
-                    <Heading color="white" fontSize="lg" flexShrink={1}>{exercisePlus.name}</Heading>
+                    <Heading color="white" fontSize="lg" flexShrink={1}>{exercise.name}</Heading>
                     <HStack alignItems="center">
                         <BodySvg />
                         <Text color="gray.200" ml={1} textTransform="capitalize">
-                            {exercisePlus.group}
+                            {exercise.group}
                         </Text>
                     </HStack>
                 </HStack>
             </VStack>
 
             <VStack p={8}>
-                <Image 
-                  w="full" 
-                  h={80}
-                  source={{uri:`${api.defaults.baseURL}/exercise/demo/${exercisePlus?.demo}`}}
-                  alt="Nome do Exercicio"
-                  mb={3}
-                  resizeMode="cover"
-                  rounded="lg"
-                 />
+              { exercise.demo && (
+                    <Image 
+                    w="full" 
+                    h={80}
+                    source={{uri: `${api.defaults.baseURL}/exercise/demo/${exercise.demo}`}}
+                    alt="Nome do Exercicio"
+                    mb={3}
+                    resizeMode="cover"
+                    rounded="lg"
+                    />
+            )}  
+               
 
                  <Box bg="gray.600" rounded="md" pb={4} px={4}>
                     <HStack 
@@ -111,19 +147,23 @@ export function Exercise(){
                         <HStack>
                             <SeriesSvg />
                             <Text color="gray.200" ml={2}>
-                            {exercisePlus.series} séries
+                            {exercise.series} séries
                             </Text>
                         </HStack>
 
                         <HStack>
                             <RepetitionsSvg />
                             <Text color="gray.200" ml={2}>
-                                {exercisePlus.repetitions} Repetições
+                                {exercise.repetitions} Repetições
                             </Text>
                         </HStack>
                     </HStack>
                    
-                   <Button title='Marcar como realizado'/>
+                   <Button 
+                    title='Marcar como realizado'
+                    isLoading={sendingRegister}
+                    onPress={handleExercisehistoryRegister}
+                    />
 
                  </Box>
             </VStack>

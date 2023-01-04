@@ -41,7 +41,7 @@ export function SignUp(){
 
     const toast = useToast();
 
-    const { SignIn } = useAuth();
+    const { signIn } = useAuth();
 
 
     const { control, handleSubmit, formState: {errors} } = useForm<FormDataProps>({
@@ -58,7 +58,7 @@ export function SignUp(){
     try {
       setisLoading(true);
       await api.post('/users', {name, email, password});
-      await SignIn(email, password);
+      await signIn(email, password);
 
     } catch (error) {
       const isAppError = error instanceof AppError;

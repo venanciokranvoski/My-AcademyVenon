@@ -1,28 +1,51 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { HistoryCard } from '@components/HistoryCard';
 import { ScreenHeader } from '@components/ScreenHeader';
-import { Heading, VStack, SectionList, Text} from 'native-base';
+import { Heading, VStack, SectionList, Text, Toast} from 'native-base';
+import { AppError } from '@utils/AppError';
+import { api } from '@services/api';
+import { useFocusEffect } from '@react-navigation/native';
+import { HistoryByDayDTO } from '@dtos/HistoryByDayDTO';
 
 
 export function History(){
-    const [groupExercises, setGroupExercises] = React.useState([{
-        title : '27.08.2023',
-        data  : ["Triceps", "Biceps", "Esteira"]
-    },
-    {
-        title : '22.07.2021',
-        data  : ["Puxada Frontal"]
+    const [groupExercises, setGroupExercises] = React.useState<HistoryByDayDTO[]>([]);
+
+   const [isLoading, setIsLoading] = React.useState<boolean>(false); 
+
+    async function fetchHystory(){
+      try {
+        setIsLoading(true);
+        const response = await api.get('/history');
+        setGroupExercises(response.data);
+      } catch (error) {
+        const isAppError = error instanceof AppError;
+        const title = isAppError ? error.message : "Não foi possível registrar exercício. !"
+
+        Toast.show({
+            title,
+            placement: "top",
+            bgColor: 'red.500'
+        })
+      }finally{
+        setIsLoading(false)
+      }
     }
-   ]);
+
+    useFocusEffect(useCallback(()=> {
+       fetchHystory();
+    },[]));
+
+
     return (
         <VStack flex={1}>
             <ScreenHeader title='Histórico de Exercicios' />
 
             <SectionList 
               sections={groupExercises}
-              keyExtractor={item => item}
+              keyExtractor={item => item.id}
               renderItem={({ item })=> (
-                <HistoryCard  />
+                <HistoryCard data={item}  />
               )}
               renderSectionHeader={({ section })=> (
                 <Heading color="gray.200" fontSize="md" mt={10} mb={3}>
