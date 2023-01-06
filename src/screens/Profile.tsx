@@ -15,6 +15,7 @@ import * as FileSystem from 'expo-file-system';
 import { useAuth } from '@hooks/useAuth';
 import { api } from '@services/api';
 import { AppError } from '@utils/AppError';
+import userPhotoDefault from '@assets/userPhotoDefault.png';
 
 
 const PHOTO_SIZE = 32;
@@ -86,9 +87,33 @@ export function Profile() {
                         bgColor: 'red.500'
                     })
                     
-                    //Alert.alert("Essa imagem é muito grande. Escolha uma de ate 5MB");
+                   
                 }
+                const fileExtension = photoInfo.uri.split('.').pop();
 
+                const photFile = {
+                    name : `${user.name}.${fileExtension}`.toLowerCase(),
+                    uri: PhotoUser.assets[0].uri,
+                    type: `${PhotoUser.assets[0].type}/${fileExtension}`
+                } as any;
+
+                const userPhotoUploadForm = new FormData();
+                userPhotoUploadForm.append('avatar', photFile);
+
+                await api.patch('/users/avatar', userPhotoUploadForm, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                ToastShow.show({
+                    title: 'Foto atualizada !',
+                    placement: 'top',
+                    bgColor: 'green.500'
+                })
+
+                console.log(photFile);
+                
                 setPhoto(PhotoUser.assets[0].uri);
             }    
 
@@ -149,7 +174,7 @@ export function Profile() {
                             />
                             :
                             <UserPhoto
-                                source={{ uri: photo }}
+                                source={user.avatar ? {uri: `${api.defaults.baseURL}/avatar/${user.avatar}`} : userPhotoDefault}
                                 alt="Foto do Usuario"
                                 size={PHOTO_SIZE}
                             />
